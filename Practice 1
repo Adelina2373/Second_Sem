@@ -1,0 +1,514 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <Windows.h>
+
+using namespace std;
+
+struct User_student {
+    string Name;
+    char Pole;
+    int Group_number;
+    int ID;
+    int Marks[8];
+};
+
+void File_Reading(User_student* Student, string Name_of_File, int Count_of_Students) {
+    ifstream Data;
+    Data.open(Name_of_File);
+
+    string str;
+    for (int i = 0; i < Count_of_Students; i++) {
+        getline(Data, str);
+        Student[i].Name = str;
+
+        getline(Data, str);
+        Student[i].Pole = str[0];
+
+        getline(Data, str);
+        Student[i].Group_number = stoi(str);
+
+        getline(Data, str);
+        Student[i].ID = stoi(str);
+
+        getline(Data, str);
+        for (int j = 0; j < 8; j++)
+
+            Student[i].Marks[j] = int(str[j]) - 48;
+    }
+    Data.close();
+
+}
+
+void File_Writing(User_student* Student, string Name_of_File, int Count_of_Students) {
+
+    ofstream Data;
+    Data.open(Name_of_File);
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        Data << Student[i].Name << '\n';
+        Data << Student[i].Pole << '\n';
+        Data << Student[i].Group_number << '\n';
+        Data << Student[i].ID << '\n';
+        for (int j = 0; j < 8; j++)
+            Data << Student[i].Marks[j];
+        Data << '\n';
+    }
+    Data.close();
+}
+
+void Add_New_Student_Profile(User_student*& Student, int& Count_of_Students) {
+    int New_File_Count = Count_of_Students + 1;
+    User_student* New_Student = new User_student[New_File_Count];
+
+    for (int i = 0; i < Count_of_Students; i++)
+        New_Student[i] = Student[i];
+    delete[] Student;
+    Student = New_Student;
+
+    SetConsoleCP(1251);
+
+    cout << "ФИО студента: ";
+    cin.ignore();
+    getline(cin, Student[New_File_Count - 1].Name);
+    cout << "Пол: ";
+    cin >> Student[New_File_Count - 1].Pole;
+    cout << "Номер группы: ";
+    cin >> Student[New_File_Count - 1].Group_number;
+    cout << "Номер в группе: ";
+    cin >> Student[New_File_Count - 1].ID;
+    cout << "Оценки: ";
+    for (int i = 0; i < 8; i++)
+        cin >> Student[New_File_Count - 1].Marks[i];
+
+    SetConsoleCP(866);
+
+    Count_of_Students = New_File_Count;
+}
+
+void Change_Student_Profile(User_student*& Student, int Count_of_Students) {
+
+    int Find_Group, Find_ID;
+
+    cout << "Введите номер группы: ";
+    cin >> Find_Group;
+    cout << "Введите номер студента в группе: ";
+    cin >> Find_ID;
+
+    int flag = -1;
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        if ((Find_Group == Student[i].Group_number) && (Find_ID == Student[i].ID)) {
+            flag = i;
+            break;
+        }
+    }
+
+    SetConsoleCP(1251);
+
+    if (flag == -1) {
+        cout << "\nЭтот студент отсутствует\n\n";
+    }
+    else {
+
+        int choose;
+
+    Menu_3: {
+        system("cls");
+        cout << Student[flag].Name << "\n";
+        cout << Student[flag].Pole << "\n";
+        cout << Student[flag].Group_number << "\n";
+        cout << Student[flag].ID << "\n";
+        for (int i = 0; i < 8; i++)
+            cout << Student[flag].Marks[i] << " ";
+
+        cout << "\n\nИзмение содержание базы: \n" <<
+            "1. ФИО студента\n" <<
+            "2. Пол\n" <<
+            "3. Номер группы\n" <<
+            "4. Номер в группе\n" <<
+            "5. Оценки\n" <<
+            "6. Завершить\n";
+        }
+
+    cin >> choose;
+
+    switch (choose) {
+
+    case 1: {
+        cout << "ФИО студента: ";
+        cin.ignore();
+        getline(cin, Student[flag].Name);
+        goto Menu_3;
+    }
+
+    case 2: {
+        cout << "Пол: ";
+        cin >> Student[flag].Pole;
+        goto Menu_3;
+    }
+
+    case 3: {
+        cout << "Номер группы: ";
+        cin >> Student[flag].Group_number;
+        goto Menu_3;
+    }
+
+    case 4: {
+        cout << " Номер в группе: ";
+        cin >> Student[flag].ID;
+        goto Menu_3;
+    }
+
+    case 5: {
+        cout << " Оценки: ";
+        for (int i = 0; i < 8; i++)
+            cin >> Student[flag].Marks[i];
+        goto Menu_3;
+    }
+
+    case 6: {
+        break;
+    }
+
+    default: {
+        cout << "\nВведите значение из меню\n\n";
+        cin.clear();
+        while (cin.get() != '\n');
+        system("pause");
+        goto Menu_3;
+    }
+    }
+    }
+
+    SetConsoleCP(866);
+}
+
+void Reflect_Data(User_student* Student, int Count_of_Students) {
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        cout << Student[i].Name << '\n';
+        cout << Student[i].Pole << '\n';
+        cout << Student[i].Group_number << '\n';
+        cout << Student[i].ID << '\n';
+        for (int j = 0; j < 8; j++)
+            cout << Student[i].Marks[j] << " ";
+        cout << "\n\n";
+    }
+}
+
+void Find_Group(User_student* Student, int Count_of_Students) {
+    int N;
+
+    cout << "Введите номер группы: ";
+    cin >> N;
+
+    system("cls");
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        if (Student[i].Group_number == N) {
+            cout << Student[i].Name << "\n";
+            cout << Student[i].Pole << "\n";
+            cout << Student[i].Group_number << "\n";
+            cout << Student[i].ID << "\n";
+            for (int j = 0; j < 8; j++)
+                cout << Student[i].Marks[j] << " ";
+            cout << "\n\n";
+        }
+    }
+}
+
+float Middle_Meaning(int i, User_student* Student) {
+    float Mark = 0;
+
+    for (int j = 0; j < 8; j++)
+        Mark += Student[i].Marks[j];
+    return (Mark / 8);
+}
+
+void Students_Top(User_student* Student, int Count_of_Students) {
+    User_student* New_Student = new User_student[Count_of_Students];
+
+    for (int i = 0; i < Count_of_Students; i++)
+        New_Student[i] = Student[i];
+
+    bool bubble_sort = true;
+
+    while (bubble_sort != false) {
+        bubble_sort = false;
+
+        for (int i = 0; i < (Count_of_Students - 1); i++) {
+            if (Middle_Meaning(i, New_Student) > Middle_Meaning(i + 1, New_Student)) {
+                swap(New_Student[i], New_Student[i + 1]);
+                bubble_sort = true;
+            }
+        }
+    }
+
+    for (int i = Count_of_Students - 1; i >= 0; i--) {
+        cout << Count_of_Students - i << ". " << New_Student[i].Name << " Средний балл студента: " << Middle_Meaning(i, New_Student) << "\n";
+    }
+    delete[] New_Student;
+}
+
+void Data_of_Students_Stependia(User_student* Student, int Count_of_Students) {
+    int choose;
+
+Menu_2: {
+    system("cls");
+    cout << "Данные каких студентов вы хотите получить?\n" <<
+        "1. Студенты без степендии\n" <<
+        "2. Студенты, учащиеся на '4' и '5'\n" <<
+        "3. Студенты, учащиеся только на '5'\n" <<
+        "4. Завершить\n";
+    }
+
+cin >> choose;
+switch (choose) {
+
+case 1: {
+    system("cls");
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        bool flag = true;
+
+        for (int j = 0; j < 8; j++)
+            if (Student[i].Marks[j] <= 3)
+                flag = false;
+
+        if (flag == false) {
+            cout << Student[i].Name << "\n";
+            cout << Student[i].Pole << "\n";
+            cout << Student[i].Group_number << "\n";
+            cout << Student[i].ID << "\n";
+
+            for (int j = 0; j < 8; j++)
+                cout << Student[i].Marks[j] << " ";
+            cout << "\n\n";
+        }
+    }
+    system("pause");
+    goto Menu_2;
+}
+
+case 2: {
+    system("cls");
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        bool flag = true;
+
+        for (int j = 0; j < 8; j++)
+            if (Student[i].Marks[j] == 4)
+                flag = false;
+
+        if (flag == true) {
+
+            cout << Student[i].Name << "\n";
+            cout << Student[i].Pole << "\n";
+            cout << Student[i].Group_number << "\n";
+            cout << Student[i].ID << "\n";
+            for (int j = 0; j < 8; j++)
+                cout << Student[i].Marks[j] << " ";
+            cout << "\n\n";
+        }
+    }
+    system("pause");
+    goto Menu_2;
+}
+
+case 3: {
+    system("cls");
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        bool flag = true;
+
+        for (int j = 0; j < 8; j++)
+            if (Student[i].Marks[j] == 4 or Student[i].Marks[j] == 5)
+                flag = false;
+
+        if (flag == true) {
+
+            cout << Student[i].Name << "\n";
+            cout << Student[i].Pole << "\n";
+            cout << Student[i].Group_number << "\n";
+            cout << Student[i].ID << "\n";
+
+            for (int j = 0; j < 8; j++)
+                cout << Student[i].Marks[j] << " ";
+            cout << "\n\n";
+        }
+    }
+    system("pause");
+    goto Menu_2;
+}
+case 4: {
+    break;
+}
+
+default: {
+    cout << "\nВведите значение из меню\n\n";
+    cin.clear();
+    while (cin.get() != '\n');
+    system("pause");
+    goto Menu_2;
+}
+}
+}
+
+void Pole_Count(User_student* Student, int Count_of_Students) {
+    int Male_Count = 0, Female_Count = 0;
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        if (Student[i].Pole == 'М')
+            Male_Count++;
+        else
+            Female_Count++;
+    }
+
+    cout << "Кол-во студентов мужского пола = " << Male_Count << "\n" << "Кол - во студентов женского пола = " << Female_Count <<
+        "\n";
+}
+
+void Find_Number(User_student* Student, int Count_of_Students) {
+    int Number_of_Student;
+
+    cout << "Введите номер студентов в группе: ";
+    cin >> Number_of_Student;
+
+    system("cls");
+
+    for (int i = 0; i < Count_of_Students; i++) {
+        if (Student[i].ID == Number_of_Student) {
+            cout << Student[i].Name << "\n";
+            cout << Student[i].Pole << "\n";
+            cout << Student[i].Group_number << "\n";
+            cout << Student[i].ID << "\n";
+
+            for (int j = 0; j < 8; j++)
+                cout << Student[i].Marks[j] << " ";
+            cout << "\n\n";
+        }
+
+    }
+}
+
+int Dimensionality(string Name_of_File) {
+    ifstream Data;
+    Data.open(Name_of_File);
+    if (!Data.is_open()) {
+        return 0;
+    }
+
+    int count = 0;
+    string str;
+
+    while (getline(Data, str)) {
+        count++;
+    }
+    Data.close();
+    return (count / 5);
+}
+
+int main() {
+    setlocale(0, "");
+    string Name_of_File = "C:\\Users\\User\\Desktop\\Practice1(2sem)\\Data.txt"; 
+    int Count_of_Students = Dimensionality(Name_of_File);
+    User_student* Student = new User_student[Count_of_Students];
+    File_Reading(Student, Name_of_File, Count_of_Students);
+    int choose;
+
+Menu: {cout << "1.   Создание новой записи о студенте.\n" <<
+
+"2.   Внесение изменений в уже имеющуюся запись.\n" <<
+
+"3.   Вывод всех данных о студентах.\n" <<
+
+"4.   Вывод информации обо всех студентах группы(необходим ввод номера группы)\n" <<
+
+"5.   Вывод топа самых успешных студентов с наивысшим по рейтингу средним баллом за прошедшую сессию.\n" <<
+
+"6.   Вывод количества студентов мужского и женского пола.\n" <<
+
+"7.   Вывод данных о студентах, которые:\n" <<
+"\t - не получают стипендию\n" <<
+"\t - учатся на «4» и «5»\n" << 
+"\t - учатся только на «5» \n" <<
+
+"8.   Вывод данных о студентах, имеющих определенный номер в списке\n";
+
+    }
+
+cin >> choose;
+switch (choose) {
+
+case 1: {
+    system("cls");
+    Add_New_Student_Profile(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 2: {
+    system("cls");
+    Change_Student_Profile(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 3: {
+    system("cls");
+    Reflect_Data(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 4: {
+    system("cls");
+    Find_Group(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 5: {
+    system("cls");
+    Students_Top(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 6: {
+    system("cls");
+    Pole_Count(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 7: {
+    system("cls");
+    Data_of_Students_Stependia(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+case 8: {
+    system("cls");
+    Find_Number(Student, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+case 9: {
+    system("cls");
+    File_Writing(Student, Name_of_File, Count_of_Students);
+    system("pause");
+    goto Menu;
+}
+
+default: {
+    cout << "\nВведите значение из меню\n\n";
+    cin.clear();
+    while (cin.get() != '\n');
+    system("pause");
+    goto Menu;
+}
+}
+}
