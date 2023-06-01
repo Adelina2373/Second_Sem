@@ -1,0 +1,428 @@
+#include <list>
+#include <string>
+#include <map>
+#include <stack>
+#include <iostream>
+
+using namespace std;
+
+int prior(char x)
+{
+	if ((x == '*') || (x == '/')) return 2;
+	if ((x == '+') || (x == '-')) return 1;
+	if ((x == '(') || (x == ')')) return 0;
+}
+
+int prior_s(string x)
+{
+	for (int i = 0; i < x.length(); i++) {
+		if ((x[i] == '*') || (x[i] == '/')) return 2;
+		if ((x[i] == '+') || (x[i] == '-')) return 1;
+		if ((x[i] == '(') || (x[i] == ')')) return 0;
+	}
+}
+
+class Stack {
+public:
+	string data;
+	int index;
+	Stack* next;
+
+	Stack(string data) {
+		this->data = data;
+		this->next = NULL;
+	}
+};
+
+class LinkedList {
+public:
+	Stack* tail, * head;
+
+public:
+	LinkedList() {
+		head = tail = NULL;
+	}
+
+	Stack* push(string data) {
+		Stack* ptr = new Stack(data);
+		ptr->next = head;
+		if (tail == NULL)
+			tail = ptr;
+		head = ptr;
+
+		return ptr;
+	}
+
+	void pop() {
+		if (head == NULL) return;
+
+		Stack* ptr = head->next;
+		if (ptr == NULL)
+			tail = NULL;
+
+		delete head;
+		head = ptr;
+	}
+
+	Stack* getAt(int index) {
+		Stack* ptr = head;
+		cout << head;
+		int n = 0;
+
+		while (n != index) {
+			if (ptr == NULL)
+				return ptr;
+			ptr = ptr->next;
+			n++;
+		}
+		return ptr;
+	}
+
+	string top() {
+		Stack* ptr = head;
+		return ptr->data;
+	}
+
+	Stack* operator [] (int index) {
+		return getAt(index);
+	}
+
+	bool pustota() {
+		if (head == NULL) return 0;
+	}
+
+};
+
+void proverka(LinkedList& stack, string operand, string& polish) {
+	if (operand != "(" && operand != ")") {
+		bool flag = false;
+		while (flag == false) {
+			if (stack.pustota() == 0 || (prior_s(operand) > prior_s(stack.top()))) {
+
+				stack.push(operand);
+				flag = true;
+			}
+			else if (prior_s(stack.top()) >= prior_s(operand)) {
+				polish += stack.top();
+				polish += " ";
+				stack.pop();
+			}
+		}
+	}
+	else if (operand == "(") {
+		stack.push(operand);
+		polish.pop_back();
+	}
+	else if (operand == ")") {
+		while (stack.top() != "(") {
+			polish += stack.top();
+			polish += " ";
+			stack.pop();
+		}
+		stack.pop();
+	}
+	return;
+}
+
+void proverka_p(LinkedList& stack, string operand, string& polish) {
+	if (operand != "(" && operand != ")") {
+		bool flag = false;
+		while (flag == false) {
+			if (stack.pustota() == 0 || (prior_s(operand) > prior_s(stack.top()))) {
+
+				stack.push(operand);
+				flag = true;
+			}
+			else if (prior_s(stack.top()) >= prior_s(operand)) {
+				polish += stack.top();
+				polish += " ";
+				stack.pop();
+			}
+		}
+	}
+	else if (operand == "(") {
+		stack.push(operand);
+	}
+	else if (operand == ")") {
+		while (stack.top() != "(") {
+			polish += stack.top();
+			polish += " ";
+			stack.pop();
+		}
+		stack.pop();
+		polish.pop_back();
+	}
+	return;
+}
+
+void symbol_check(string& symbol, string& polish) {
+	int xyz;
+	try {
+		int num = stoi(symbol);
+		polish += symbol;
+		polish += " ";
+	}
+	catch (...) {
+		cout << symbol << " = ";
+		cin >> xyz;
+		polish += to_string(xyz);
+		polish += " ";
+	}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	string symbol_p;
+	string str;
+	string formula;
+	string pformula;
+	LinkedList pchisla;
+	string psymbol;
+	cout << "Введите формулу: ";
+	cin >> formula;
+	int choose;
+	string schet;
+Menu: {
+	cout << "В какую форму хотите преоразовать выражение? :\n"
+		<< "1. Обратная польская нотация.\n"
+		<< "2. Прямая польская нотация.\n"
+		<< "3. Выход.\n";
+	}
+cin >> choose;
+switch (choose) {
+case 1: {
+	system("cls");
+	int position = 0;
+	string symbol;
+	string polish;
+	string ctek;
+	LinkedList stack;
+	for (int i = 0; i <= formula.length(); i++) {
+		if (formula[i] == '+' || formula[i] == '-' || formula[i] == '*' || formula[i] == '/' || formula[i] == '(' || formula[i] == ')') {
+			symbol = formula.substr(position, i - position);
+			if (!(symbol == "+" || symbol == "-" || symbol == "*" || symbol == "/" || symbol == "(" || symbol == ")")) {
+				if ("a" <= symbol && symbol <= "z")
+					symbol_check(symbol, polish);
+				else {
+					polish += symbol;
+					polish += " ";
+				}
+			}
+			string operand = formula.substr(i, 1);
+			proverka(stack, operand, polish);
+			position = i + 1;
+			ctek += stack.top();
+			cout << "Стек: " << ctek << endl;
+		}
+	}
+	symbol = formula.substr(position);
+	polish += symbol;
+	while (stack.pustota() != 0) {
+		polish += stack.top();
+		polish += " ";
+		stack.pop();
+	}
+	cout << polish << endl;
+	schet = polish;
+Menu1: {
+	cout << "Хотите вычислить значение данного выражения? :\n"
+		<< "1. Да.\n"
+		<< "2. Нет.\n";
+	}
+int choose1;
+cin >> choose1;
+switch (choose1) {
+case 1: {
+	LinkedList chisla;
+	string symbol;
+	int count = 0;
+	for (int i = 0; i < schet.length(); i++) {
+		if (schet[i] == ' ') {
+			symbol = schet.substr(count, i - count);
+			if (!(symbol == "+" || symbol == "-" || symbol == "*" || symbol == "/")) {
+				chisla.push(symbol);
+			}
+			else {
+				int num1 = stoi(chisla.top());
+				chisla.pop();
+				int num2 = stoi(chisla.top());
+				chisla.pop();
+
+				if (symbol == "*") {
+					int num = num1 * num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+				else if (symbol == "/") {
+					auto num = num1 / num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+				else if (symbol == "+") {
+					int num = num1 + num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+				else if (symbol == "-") {
+					int num = num2 - num1;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+			}
+			count = i + 1;
+		}
+
+	}
+	int rez = stoi(chisla.top());
+	cout << "Результат = " << rez << endl;
+	system("pause");
+	goto Menu;
+
+}
+case 2: {
+	return 0;
+}
+default: {
+	cout << "\nВведите значение из меню\n\n";
+	cin.clear();
+	while (cin.get() != '\n');
+	system("pause");
+	goto Menu1;
+}
+}
+goto Menu;
+}
+case 2: {
+	system("cls");
+	int position_p = 0;
+	LinkedList stack_p;
+	pformula = formula;
+	reverse(pformula.begin(), pformula.end());
+	for (int i = 0; i < pformula.length(); i++) {
+		if (pformula[i] == ')') {
+			pformula[i] = '(';
+		}
+		else if (pformula[i] == '(') {
+			pformula[i] = ')';
+		}
+	}
+	string ctekp;
+	for (int i = 0; i <= pformula.length(); i++) {
+		if (pformula[i] == '+' || pformula[i] == '-' || pformula[i] == '*' || pformula[i] == '/' || pformula[i] == '(' || pformula[i] == ')') {
+			symbol_p = pformula.substr(position_p, i - position_p);
+			//cout << symbol << endl;
+			if (!(symbol_p == "+" || symbol_p == "-" || symbol_p == "*" || symbol_p == "/" || symbol_p == "(" || symbol_p == ")")) {
+				if ("a" <= symbol_p && symbol_p <= "z")
+					symbol_check(symbol_p, str);
+				else {
+					str += symbol_p;
+					str += " ";
+				}
+			}
+			string operand_p = pformula.substr(i, 1);
+			proverka_p(stack_p, operand_p, str);
+			position_p = i + 1;
+			if (stack_p.pustota() != 0) {
+				ctekp += stack_p.top();
+				cout << "Стек: " << ctekp << endl;
+			}
+		}
+	}
+	symbol_p = pformula.substr(position_p);
+	str += symbol_p;
+	str += " ";
+
+	while (stack_p.pustota() != 0) {
+		str += stack_p.top();
+		stack_p.pop();
+	}
+	reverse(str.begin(), str.end());
+	schet = str;
+	cout << str << endl;
+Menu2: {
+	cout << "Хотите вычислить значение данного выражения? :\n"
+		<< "1. Да.\n"
+		<< "2. Нет.\n";
+	}
+int choose1;
+cin >> choose1;
+switch (choose1) {
+case 1: {
+	system("cls");
+	reverse(schet.begin(), schet.end());
+	LinkedList chisla;
+	string symbol;
+	cout << schet << '\n';
+	schet += ' ';
+	int count = 0;
+	for (int i = 0; i < schet.length(); i++) {
+		if (schet[i] == ' ') {
+			symbol = schet.substr(count, i - count);
+			if (!(symbol == "+" || symbol == "-" || symbol == "*" || symbol == "/")) {
+				reverse(symbol.begin(), symbol.end());
+				chisla.push(symbol);
+			}
+			else {
+				int num1 = stoi(chisla.top());
+				chisla.pop();
+				int num2 = stoi(chisla.top());
+				chisla.pop();
+
+				if (symbol == "+") {
+					int num = num1 + num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+				else if (symbol == "-") {
+					int num = num1 - num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+				else if (symbol == "/") {
+					auto num = num1 / num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+				else if (symbol == "*") {
+					int num = num1 * num2;
+					symbol = std::to_string(num);
+					chisla.push(symbol);
+				}
+			}
+			count = i + 1;
+		}
+
+	}
+	string result;
+	result = chisla.top();
+	reverse(result.begin(), result.end());
+	int rez = stoi(result);
+	cout << "Результат = " << rez << endl;
+	system("pause");
+	goto Menu;
+}
+case 2: {
+	return 0;
+}
+default: {
+	cout << "\nВведите значение из меню\n\n";
+	cin.clear();
+	while (cin.get() != '\n');
+	system("pause");
+	goto Menu2;
+}
+}
+}
+case 3: {
+	return 0;
+}
+default: {
+	cout << "\nВведите значение из меню\n\n";
+	cin.clear();
+	while (cin.get() != '\n');
+	system("pause");
+	goto Menu;
+}
+}
+}}
