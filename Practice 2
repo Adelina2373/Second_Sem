@@ -1,0 +1,376 @@
+#include <iostream>
+#include <ctime>
+#include <chrono>
+
+using namespace std;
+using namespace chrono;
+
+class Node {
+public:
+	int data;
+	int index;
+	Node* prev, * next;
+
+public:
+	Node(int data) {
+		this->data = data;
+		this->prev = this->next = NULL;
+		}
+};
+
+class LinkedList {
+public:
+	Node* head, * tail;
+
+public:
+	LinkedList() {
+		head = tail = NULL;
+	}
+
+	~LinkedList() {
+		while (head != NULL)
+			pop_front();
+	}
+
+	Node* push_front(int data) {
+		Node* ptr = new Node(data);
+		ptr->next = head;
+		if (head != NULL)
+			head->prev = ptr;
+		if (tail == NULL)
+			tail = ptr;
+		head = ptr;
+
+		return ptr;
+	}
+
+
+	Node* push_back(int data) {
+		Node* ptr = new Node(data);
+		ptr->prev = tail;
+		if (tail != NULL)
+			tail->next = ptr;
+		if (head == NULL)
+			head = ptr;
+		tail = ptr;
+
+		return ptr;
+	}
+
+	void pop_front() {
+		if (head == NULL) return;
+
+		Node* ptr = head->next;
+		if (ptr != NULL)
+			ptr->prev = NULL;
+		else
+			tail = NULL;
+
+		delete head;
+		head = ptr;
+	}
+
+	void pop_back() {
+		if (tail == NULL) return;
+
+		Node* ptr = tail->prev;
+		if (ptr != NULL)
+			ptr->next = NULL;
+		else
+			head = NULL;
+
+		delete tail;
+		tail = ptr;
+	}
+
+	Node* getAt(int index) {
+		Node* ptr = head;
+		int n = 0;
+
+		while (n != index) {
+			if (ptr == NULL)
+				return ptr;
+			ptr = ptr->next;
+			n++;
+		}
+		return ptr;
+	}
+
+	Node* operator [] (int index) {
+		return getAt(index);
+	}
+
+	Node* insert(int index, int data) {
+		Node* right = getAt(index);
+		if (right == NULL)
+			return push_back(data);
+
+		Node* left = right->prev;
+		if (left == NULL)
+			return push_front(data);
+
+		Node* ptr = new Node(data);
+
+		ptr->prev = left;
+		ptr->next = right;
+		left->next = ptr;
+		right->prev = ptr;
+
+		return ptr;
+	}
+
+	void earase(int index) {
+		Node* ptr = getAt(index);
+		if (ptr == NULL)
+			return;
+
+		if (ptr->prev == NULL) {
+			pop_front();
+			return;
+		}
+
+		if (ptr->next == NULL) {
+			pop_back();
+			return;
+		}
+
+		Node* left = ptr->prev;
+		Node* right = ptr->next;
+		left->next = right;
+		right->prev = left;
+
+
+	}
+
+};
+
+
+
+int main()
+{
+	setlocale(0, "");
+	int N;
+	int choose;
+	LinkedList lst;
+Menu: {
+	cout << " Сформировать двусвязный список размерности N.\n" <<
+"1. Автоматичеки\n" <<
+"2. В ручную\n" <<
+"3. Выход\n";
+	}
+
+cin >> choose;
+switch (choose) {
+
+case 1: {
+	system("cls");
+	srand(time(0));
+	int N, Count = 0, k;
+	cout << "\nВведите размер: ";
+	cin >> N;
+	cout << "\nВведите значение для ИДЗ: ";
+	cin >> k;
+	auto time1 = steady_clock::now();
+	for (int i = 1; i <= N; i++) {
+		lst.push_back(rand() % 100);
+	}
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next) {
+		cout << ptr->data << " ";
+	}
+	cout << "\n";
+	auto time1_1 = steady_clock::now();
+	for (int j = 0; j < N; j++) {
+		if (lst[j]->data % k == 0) {
+			Count++;
+
+			cout << lst[j]->data << " ";
+		}
+	}
+
+	int* Idz = new int[Count];
+	for (int p = 0; p < N; p++) {
+		if (lst[p]->data % k == 0) {
+			for (int c = 0; c < Count; c++) {
+				Idz[c] = lst[p]->data;
+				//cout << Idz[c] << " ";
+			}
+		}
+	}
+
+	cout << "\nЗначение которые деляться на " << k << " равно : " << Count << endl;
+	auto time2_1 = steady_clock::now();
+	auto time2 = steady_clock::now();
+	cout << "Время создания двусвязного списка " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	cout << "Время создания динамического массива " << duration_cast<nanoseconds>(time2_1 - time1_1).count() << " наносекунд\n";
+	cout << "Разница составляет " << (duration_cast<nanoseconds>(time2 - time1).count()) - (duration_cast<nanoseconds>(time2_1 - time1_1).count()) << " наносекунд\n";
+	system("pause");
+	break;
+
+}
+
+case 2: {
+	system("cls");
+	int N, Count = 0, k, count = 0;
+	bool flag = true;
+	cout << "\nВведите значение для ИДЗ: ";
+	cin >> k;
+	cout << "\nВведите список:  \n";
+	cout << "\nДля завершения ввода, введите '0': ";
+	auto time1 = steady_clock::now();
+	while (flag == true) {
+		cin >> N;
+		if (N != 0) {
+			count++;
+			lst.push_back(N);
+			if (N % k == 0) {
+				Count++;
+			}
+		}
+		else
+			flag = false;
+	}
+	//cout << count;
+	
+	auto time1_1 = steady_clock::now();
+
+	int* Idz1 = new int[Count];
+	for (int p = 0; p < count; p++) {
+		if (lst[p]->data % k == 0) {
+			for (int c = 0; c < Count; c++) {
+				Idz1[c] = lst[p]->data;
+				cout << Idz1[c] << " ";
+				break;
+			}
+		}
+	}
+	
+	cout << "\nЗначение которые деляться на " << k << " равно : " << Count << endl;
+	auto time2_1 = steady_clock::now();
+	cout << endl;
+	auto time2 = steady_clock::now();
+	cout << "Время создания " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	cout << "Время создания динамического массива " << duration_cast<nanoseconds>(time2_1 - time1_1).count() << " наносекунд\n";
+	cout << "Разница составляет " << (duration_cast<nanoseconds>(time2 - time1).count()) - (duration_cast<nanoseconds>(time2_1 - time1_1).count()) << " наносекунд\n";
+	system("pause");
+	break;
+}
+
+case 3: {
+	return 0;
+}
+
+default: {
+	cout << "\nВведите значение из меню\n\n";
+	cin.clear();
+	while (cin.get() != '\n');
+	system("pause");
+	goto Menu;
+}
+}
+
+Menu2: {
+system("cls");
+for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next) {
+	cout << ptr->data << " ";
+}
+cout << "\nВыбирете действие:\n"
+<< "1. Вставить элемент в список.\n"
+<< "2. Удалить элемент из списка.\n"
+<< "3. Поменять элементы списка местами.\n"
+<< "4. Получить элемент списка.\n"
+<< "5. Выход.\n";
+}
+
+cin >> choose;
+switch (choose) {
+
+case 1: {
+	system("cls");
+	int i;
+	float n;
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	cout << "\nВведите индекс элемента, на место которого хотите вставить новый элемент: ";
+	cin >> i;
+	cout << "\nВведите значение элемента: ";
+	cin >> n;
+	auto time1 = steady_clock::now();
+	lst.insert(i, n);
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	cout << endl;
+	auto time2 = steady_clock::now();
+	cout << "Время вставки " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	system("pause");
+	goto Menu2;
+}
+
+case 2: {
+	system("cls");
+	float i;
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	cout << endl;
+	cout << "\nВведите индекс элемента, который хотите удалить: ";
+	cin >> i;
+	auto time1 = steady_clock::now();
+	lst.earase(i);
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	cout << endl;
+	auto time2 = steady_clock::now();
+	cout << "Время вставки " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	system("pause");
+	goto Menu2;
+}
+
+case 3: {
+	system("cls");
+	int n, f;
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	cout << "\nВведите индекс первого элемента: ";
+	cin >> n;
+	cout << "Введите индекс второго элемента: ";
+	cin >> f;
+	swap(lst[n]->data, lst[f]->data);
+	auto time1 = steady_clock::now();
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	auto time2 = steady_clock::now();
+	cout << "Время вставки " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	system("pause");
+	goto Menu2;
+}
+
+case 4: {
+	system("cls");
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	int N;
+	cout << "\nВведите индекс значения: ";
+	cin >> N;
+	auto time1 = steady_clock::now();
+	cout << lst[N]->data << endl;
+	for (Node* ptr = lst.head; ptr != NULL; ptr = ptr->next)
+		cout << ptr->data << " ";
+	cout << endl;
+	auto time2 = steady_clock::now();
+	cout << "Время вставки " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	system("pause");
+	goto Menu2;
+}
+
+case 5: {
+	return 0;
+}
+
+default: {
+	cout << "\nВведите значение из меню\n\n";
+	cin.clear();
+	while (cin.get() != '\n');
+	system("pause");
+	goto Menu2;
+}
+}
+}
