@@ -1,0 +1,535 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <ctime>
+#include <chrono>
+using namespace std;
+using namespace chrono;
+struct Node {
+    int key;
+    struct Node* left, * right;
+};
+
+struct Node* newNode(int item) {
+    struct Node* temp = (struct Node*)malloc(sizeof(struct Node));
+    temp->key = item;
+    temp->left = temp->right = NULL;
+    return temp;
+}
+
+void File_Reading(Node* Tree, string Name_of_File, int Count) {
+    ifstream Data;
+    Data.open(Name_of_File);
+
+    string str;
+    for (int i = 0; i < Count; i++) {
+        getline(Data, str);
+        Tree[i].key = stoi(str);
+    }
+    Data.close();
+
+}
+void File_Reading_Task(string Name_of_File, int N) {
+    ifstream Data;
+    Data.open(Name_of_File);
+
+    string str;
+    for (int i = 0; i < N; i++) {
+        getline(Data, str);
+        Name_of_File = str;
+    }
+    Data.close();
+}
+
+
+void T_File(string Name_of_File, int N) {
+
+    ofstream Data;
+    Data.open(Name_of_File);
+    const int task = 3;
+    const char* taskbank[task] = { "Вставьте в дерево элемент: ", "Удалите из дерева элемент: ", "Создайте бинарное дерево поиска из массива значений: " };
+    for (int i = 0; i < N; i++) {
+        int rnd_task = rand() % task;
+        if (rnd_task == 2) {
+            int numb[10];
+            Data << taskbank[rnd_task];
+            for (int i = 0; i < 10; i++)
+                numb[i] = rand() % 100;
+            for (int i = 0; i < 10; i++)
+                Data << numb[i] << " ";
+            Data << "\n";
+        }
+        else if (rnd_task == 0) {
+            int rnd_task_num = rand() % 100;
+            Data << taskbank[rnd_task] << rnd_task_num << '\n';
+        }
+        else if (rnd_task == 1) {
+            int rnd_task_num = rand() % 100;
+            Data << taskbank[rnd_task] << rnd_task_num << '\n';
+        }
+
+    }
+    Data.close();
+}
+
+void Reflect_Data(Node* Tree, int Count) {
+
+    for (int i = 0; i < Count; i++) {
+        cout << Tree[i].key << '\n';
+        cout << "\n\n";
+    }
+}
+
+void inorder(struct Node* root) {
+    if (root != NULL) {
+        inorder(root->left);
+
+        cout << root->key << " -> ";
+
+        inorder(root->right);
+    }
+}
+
+
+void print_Tree(Node* p, int level)
+{
+    if (p != NULL) {
+        if (p)
+        {
+            print_Tree(p->left, level + 1);
+            for (int i = 0; i < level; i++) cout << "   ";
+            cout << p->key << endl;
+            print_Tree(p->right, level + 1);
+        }
+    }
+}
+
+struct Node* insert(struct Node* Tree, int key) {
+
+    if (Tree == NULL) return newNode(key);
+
+    if (key < Tree->key)
+        Tree->left = insert(Tree->left, key);
+    else
+        Tree->right = insert(Tree->right, key);
+
+    return Tree;
+}
+
+struct Node* minValueNode(struct Node* node) {
+    struct Node* current = node;
+
+    while (current && current->left != NULL)
+        current = current->left;
+
+    return current;
+}
+
+struct Node* deleteNode(struct Node* root, int key) {
+
+    if (root == NULL) return root;
+
+    if (key < root->key)
+        root->left = deleteNode(root->left, key);
+    else if (key > root->key)
+        root->right = deleteNode(root->right, key);
+    else {
+
+        if (root->left == NULL) {
+            struct Node* temp = root->right;
+            free(root);
+            return temp;
+        }
+        else if (root->right == NULL) {
+            struct Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        struct Node* temp = minValueNode(root->right);
+
+        root->key = temp->key;
+
+        root->right = deleteNode(root->right, temp->key);
+    }
+    return root;
+}
+
+void search(Node* Tree, int key) {
+    if (Tree) {
+        if (key == Tree->key) {
+            cout << "Элемент " << key << " есть в дереве.\n";
+            return;
+        }
+        else if (key > Tree->key)
+            search(Tree->right, key);
+        else if (key < Tree->key)
+            search(Tree->left, key);
+    }
+    else {
+        cout << "Данного элемента нет в дереве\n";
+        return;
+    }
+}
+
+void stright(Node* Tree, int key)
+{
+    if (Tree == NULL) return;
+    for (int i = 0; i < key; ++i) cout << "|";
+    cout << Tree->key << endl; 
+    key--;
+    stright(Tree->left, ++key);
+    stright(Tree->right, ++key);
+}
+
+void reverse(Node* Tree, int key) {
+    if (Tree == NULL) return;
+    else {
+        reverse(Tree->left, ++key);
+        reverse(Tree->right, ++key);
+        for (int i = 0; i < key; ++i) cout << "|";
+        cout << Tree->key << endl;
+        key--;
+    }
+}
+
+void symmetry(Node* Tree, int key) {
+    if (Tree == NULL) return;
+    else {
+        symmetry(Tree->left, ++key);
+        for (int i = 0; i < key; ++i) cout << "|";
+        cout << Tree->key << endl; 
+        key--;
+    }
+    symmetry(Tree->right, ++key);
+}
+
+int Dimensionality(string Name_of_File) {
+    ifstream Data;
+    Data.open(Name_of_File);
+    if (!Data.is_open()) {
+        return 0;
+    }
+
+    int count = 0;
+    string str;
+
+    while (getline(Data, str)) {
+        count++;
+    }
+    Data.close();
+    return (count);
+}
+
+int main() {
+    setlocale(0, "");
+	struct Node* root = NULL;
+	int choose;
+Menu: {
+	cout << " Сформировать бинарное дерево: \n" <<
+		"1. Автоматичеки\n" <<
+		"2. В ручную\n" <<
+        "3. Чтение из файла\n" <<
+		"4. Выход\n";
+	}
+
+cin >> choose;
+switch (choose) {
+
+case 1: {
+	system("cls");
+	srand(time(0));
+    int N;
+    int count = 0;
+	cout << "\nВведите размер: ";
+	cin >> N;
+	auto time1 = steady_clock::now();
+	for (int i = 1; i <= N; i++) {
+		root = insert(root, rand() % 100);
+	}
+    cout << "Отсортированный обход:\n";
+    print_Tree(root, count);
+    //inorder(root);
+	
+	auto time2 = steady_clock::now();
+	cout << "Время создания дерева " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+
+    int input;
+    cout << "Операции над деревом:\n" <<
+        "1.Вставка элемента\n" <<
+        "2.Удаление элемента\n" <<
+        "3.Получение элемента\n";
+    cin >> input;
+    if (input == 1) {
+        auto time1_1 = steady_clock::now();
+        int data;
+        cout << "Введите значение для вставки: ";
+        cin >> data;
+        root = insert(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+        auto time2_1 = steady_clock::now();
+        cout << "Время вставки элемента в дерево = " << duration_cast<nanoseconds>(time2_1 - time1_1).count() << " наносекунд\n";
+    }
+    else if (input == 2) {
+        auto time1_2 = steady_clock::now();
+        int data;
+        cout << "Введите значение для удаления: ";
+        cin >> data;
+        root = deleteNode(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+        auto time2_2 = steady_clock::now();
+        cout << "Время удаление элемента в дереве = " << duration_cast<nanoseconds>(time2_2 - time1_2).count() << " наносекунд\n";
+    }
+    else if (input == 3) {
+        auto time1_3 = steady_clock::now();
+        int data;
+        cout << "Введите значение для поиска: ";
+        cin >> data;
+        search(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+        auto time2_3 = steady_clock::now();
+        cout << "Время поиска элемента в дереве = " << duration_cast<nanoseconds>(time2_3 - time1_3).count() << " наносекунд\n";
+    }
+    else
+        cout << "Incorrect input. Try again" << endl;
+
+    int input_o;
+    cout << "Обход по дереву:\n" <<
+        "1.Прямой\n" <<
+        "2.Обратный\n" <<
+        "3.Симметричный\n";
+    cin >> input_o;
+    if (input_o == 1) {
+        stright(root, N);
+    }
+    else if (input_o == 2) {
+        reverse(root, N);
+    }
+    else if (input_o == 3) {
+        symmetry(root, N);
+    }
+    else
+        cout << "Incorrect input. Try again" << endl;
+
+	system("pause");
+    goto Menu;
+
+}
+
+case 2: {
+	system("cls");
+	int N, count = 0;
+    int summ = 0;
+	bool flag = true;
+	cout << "\nВведите список:  \n";
+	cout << "\nДля завершения ввода, введите '0': ";
+	auto time1 = steady_clock::now();
+	while (flag == true) {
+		cin >> N;
+		if (N != 0) {
+			count++;
+			root = insert(root, N);
+		}
+		else
+			flag = false;
+	}
+    cout << "Отсортированный обход:\n";
+    print_Tree(root, summ);
+    //inorder(root);
+
+
+	cout << endl;
+	auto time2 = steady_clock::now();
+	cout << "Время создания дерева" << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+	
+    int input;
+    cout << "Операции над деревом:\n" <<
+        "1.Вставка элемента\n" <<
+        "2.Удаление элемента\n" <<
+        "3.Получение элемента\n";
+    cin >> input;
+    if (input == 1) {
+        auto time1_1 = steady_clock::now();
+        int data;
+        cout << "Введите значение для вставки: ";
+        cin >> data;
+        root = insert(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, summ);
+        //inorder(root);
+        auto time2_1 = steady_clock::now();
+        cout << "Время вставки элемента в дерево = " << duration_cast<nanoseconds>(time2_1 - time1_1).count() << " наносекунд\n";
+    }
+    else if (input == 2) {
+        auto time1_2 = steady_clock::now();
+        int data;
+        cout << "Введите значение для удаления: ";
+        cin >> data;
+        root = deleteNode(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, summ);
+        //inorder(root);
+        auto time2_2 = steady_clock::now();
+        cout << "Время удаление элемента в дереве = " << duration_cast<nanoseconds>(time2_2 - time1_2).count() << " наносекунд\n";
+    }
+    else if (input == 3) {
+        auto time1_3 = steady_clock::now();
+        int data;
+        cout << "Введите значение для поиска: ";
+        cin >> data;
+        search(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, summ);
+        //inorder(root);
+        auto time2_3 = steady_clock::now();
+        cout << "Время поиска элемента в дереве = " << duration_cast<nanoseconds>(time2_3 - time1_3).count() << " наносекунд\n";
+    }
+    else
+        cout << "Incorrect input. Try again" << endl;
+
+    int input_o;
+    cout << "Обход по дереву:\n" <<
+        "1.Прямой\n" <<
+        "2.Обратный\n" <<
+        "3.Симметричный\n";
+    cin >> input_o;
+    if (input_o == 1) {
+        stright(root, count);
+    }
+    else if (input_o == 2) {
+        reverse(root, count);
+    }
+    else if (input_o == 3) {
+        symmetry(root, count);
+    }
+    else
+        cout << "Incorrect input. Try again" << endl;
+
+	system("pause");
+    goto Menu;
+}
+
+case 3: {
+    system("cls");
+    int count = 0;
+    string Name_of_File = "C:\\Users\\User\\Desktop\\rurs\\Data.txt";
+    int Count = Dimensionality(Name_of_File);
+    Node* Tree = new Node[Count];
+    auto time1 = steady_clock::now();
+    ifstream Data;
+    Data.open(Name_of_File);
+
+    string str;
+    for (int i = 0; i < Count; i++) {
+        getline(Data, str);
+        root = insert(root,stoi(str));
+    }
+    Data.close();
+
+    cout << "Отсортированный обход:\n";
+    print_Tree(root, count);
+    //inorder(root);
+    auto time2 = steady_clock::now();
+    cout << "Время создания дерева " << duration_cast<nanoseconds>(time2 - time1).count() << " наносекунд\n";
+
+    int input;
+    cout << "Операции над деревом:\n" <<
+        "1.Вставка элемента\n" <<
+        "2.Удаление элемента\n" <<
+        "3.Получение элемента\n" <<
+        "4.Генерация задания\n";
+    cin >> input;
+    if (input == 1) {
+        auto time1_1 = steady_clock::now();
+        int data;
+        cout << "Введите значение для вставки: ";
+        cin >> data;
+        root = insert(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+        auto time2_1 = steady_clock::now();
+        cout << "Время вставки элемента в дерево = " << duration_cast<nanoseconds>(time2_1 - time1_1).count() << " наносекунд\n";
+    }
+    else if (input == 2) {
+        auto time1_2 = steady_clock::now();
+        int data;
+        cout << "Введите значение для удаления: ";
+        cin >> data;
+        root = deleteNode(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+        auto time2_2 = steady_clock::now();
+        cout << "Время удаление элемента в дереве = " << duration_cast<nanoseconds>(time2_2 - time1_2).count() << " наносекунд\n";
+    }
+    else if (input == 3) {
+        auto time1_3 = steady_clock::now();
+        int data;
+        cout << "Введите значение для поиска: ";
+        cin >> data;
+        search(root, data);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+        auto time2_3 = steady_clock::now();
+        cout << "Время поиска элемента в дереве = " << duration_cast<nanoseconds>(time2_3 - time1_3).count() << " наносекунд\n";
+    }
+    else if (input == 4) {
+        string Task_File = "C:\\Users\\User\\Desktop\\rurs\\output_task.txt";
+        string Key_File = "C:\\Users\\User\\Desktop\\rurs\\output_key.txt";
+        string Ans_File = "C:\\Users\\User\\Desktop\\rurs\\output_ans.txt";
+        int N;
+        cout << "Введите количество заданий по действиям над Бинарным деревом: ";
+        cin >> N;
+        T_File(Task_File, N);
+        int count = Dimensionality(Task_File);
+        File_Reading_Task(Task_File, count);
+        cout << "Отсортированный обход:\n";
+        print_Tree(root, count);
+        //inorder(root);
+    }
+    else
+        cout << "Incorrect input. Try again" << endl;
+
+    int input_o;
+    cout << "Обход по дереву:\n" <<
+        "1.Прямой\n" <<
+        "2.Обратный\n" <<
+        "3.Симметричный\n";
+    cin >> input_o;
+    if (input_o == 1) {
+        stright(root, Count);
+    }
+    else if (input_o == 2) {
+        reverse(root, Count);
+    }
+    else if (input_o == 3) {
+        symmetry(root, Count);
+    }
+    else
+        cout << "Incorrect input. Try again" << endl;
+
+    system("pause");
+    goto Menu;
+}
+
+case 4: {
+	return 0;
+}
+
+default: {
+	cout << "\nВведите значение из меню\n\n";
+	cin.clear();
+	while (cin.get() != '\n');
+	system("pause");
+	goto Menu;
+}
+}
+}
